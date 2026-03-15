@@ -86,17 +86,17 @@ ComfyUI expects models in specific subdirectories:
 ```
 ComfyUI/
 └── models/
-    ├── unet/
+    ├── diffusion_models/
     │   └── z_image_turbo_bf16.safetensors   ← main model
-    ├── clip/
+    ├── text_encoders/
     │   └── qwen_3_4b.safetensors            ← text encoder
     └── vae/
         └── ae.safetensors                   ← VAE
 ```
 
 ```bash
-cp ~/Downloads/z-image-turbo/z_image_turbo_bf16.safetensors ComfyUI/models/unet/
-cp ~/Downloads/z-image-turbo/qwen_3_4b.safetensors ComfyUI/models/clip/
+cp ~/Downloads/z-image-turbo/z_image_turbo_bf16.safetensors ComfyUI/models/diffusion_models/
+cp ~/Downloads/z-image-turbo/qwen_3_4b.safetensors ComfyUI/models/text_encoders/
 cp ~/Downloads/z-image-turbo/ae.safetensors ComfyUI/models/vae/
 ```
 
