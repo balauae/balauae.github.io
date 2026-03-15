@@ -48,6 +48,11 @@ On the 5090, a 1024×1024 image generates in **under 5 seconds**.
 
 ### Downloading from Hugging Face
 
+> **Note:** Z-Image-Turbo is a gated model. Before downloading, go to
+> [huggingface.co/Zhengyi/Z-Image-Turbo](https://huggingface.co/Zhengyi/Z-Image-Turbo),
+> log in with your HuggingFace account, and click **"Agree and access repository"** to accept
+> the model license. The download will fail with a 403 error if you skip this step.
+
 You'll need three files from HuggingFace. Install the CLI first if you haven't:
 
 ```bash
