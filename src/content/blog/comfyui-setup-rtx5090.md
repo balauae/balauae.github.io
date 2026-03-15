@@ -52,24 +52,24 @@ You'll need three files from HuggingFace. Install the CLI first if you haven't:
 
 ```bash
 pip install huggingface_hub
-huggingface-cli login   # paste your HF token (free account)
+hf login   # paste your HF token (free account)
 ```
 
 Then download each file:
 
 ```bash
 # 1. The main diffusion model (UNET)
-huggingface-cli download Zhengyi/Z-Image-Turbo \
+hf download Zhengyi/Z-Image-Turbo \
   z_image_turbo_bf16.safetensors \
   --local-dir ~/Downloads/z-image-turbo
 
 # 2. The text encoder (CLIP - Qwen 3 4B)
-huggingface-cli download Zhengyi/Z-Image-Turbo \
+hf download Zhengyi/Z-Image-Turbo \
   qwen_3_4b.safetensors \
   --local-dir ~/Downloads/z-image-turbo
 
 # 3. The VAE
-huggingface-cli download Zhengyi/Z-Image-Turbo \
+hf download Zhengyi/Z-Image-Turbo \
   ae.safetensors \
   --local-dir ~/Downloads/z-image-turbo
 ```
