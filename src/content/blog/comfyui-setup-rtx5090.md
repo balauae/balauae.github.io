@@ -46,12 +46,54 @@ I'm using **Z-Image-Turbo** — a distilled diffusion model that only needs **8 
 
 On the 5090, a 1024×1024 image generates in **under 5 seconds**.
 
-Download and place in `ComfyUI/models/unet/`:
-- `z_image_turbo_bf16.safetensors`
+### Downloading from Hugging Face
 
-You'll also need:
-- `qwen_3_4b.safetensors` → `models/clip/` (text encoder)
-- `ae.safetensors` → `models/vae/`
+You'll need three files from HuggingFace. Install the CLI first if you haven't:
+
+```bash
+pip install huggingface_hub
+huggingface-cli login   # paste your HF token (free account)
+```
+
+Then download each file:
+
+```bash
+# 1. The main diffusion model (UNET)
+huggingface-cli download Zhengyi/Z-Image-Turbo \
+  z_image_turbo_bf16.safetensors \
+  --local-dir ~/Downloads/z-image-turbo
+
+# 2. The text encoder (CLIP - Qwen 3 4B)
+huggingface-cli download Zhengyi/Z-Image-Turbo \
+  qwen_3_4b.safetensors \
+  --local-dir ~/Downloads/z-image-turbo
+
+# 3. The VAE
+huggingface-cli download Zhengyi/Z-Image-Turbo \
+  ae.safetensors \
+  --local-dir ~/Downloads/z-image-turbo
+```
+
+### Where to place the files
+
+ComfyUI expects models in specific subdirectories:
+
+```
+ComfyUI/
+└── models/
+    ├── unet/
+    │   └── z_image_turbo_bf16.safetensors   ← main model
+    ├── clip/
+    │   └── qwen_3_4b.safetensors            ← text encoder
+    └── vae/
+        └── ae.safetensors                   ← VAE
+```
+
+```bash
+cp ~/Downloads/z-image-turbo/z_image_turbo_bf16.safetensors ComfyUI/models/unet/
+cp ~/Downloads/z-image-turbo/qwen_3_4b.safetensors ComfyUI/models/clip/
+cp ~/Downloads/z-image-turbo/ae.safetensors ComfyUI/models/vae/
+```
 
 ## The Workflow
 
@@ -102,29 +144,48 @@ I use this to generate images directly from Telegram — I send a prompt, the GP
 
 **Seed:** Fix your seed for reproducible results while iterating on prompts.
 
-## Running as a Service
+## On-Demand Loading (Don't Waste VRAM)
 
-I run ComfyUI as a systemd service so it's always available:
+Running ComfyUI as a permanent service locks up ~20GB of VRAM constantly — even when you're not generating images. That's wasteful, especially if you're also running Ollama or other GPU workloads.
 
-```ini
-[Unit]
-Description=ComfyUI
-After=network.target
+My approach: **start ComfyUI only when needed, stop it when done.**
 
-[Service]
-User=bala
-WorkingDirectory=/home/bala/ComfyUI
-ExecStart=/usr/bin/python3 main.py --listen 127.0.0.1 --port 8188
-Restart=on-failure
+I created two simple shell scripts:
 
-[Install]
-WantedBy=multi-user.target
+```bash
+# ~/scripts/comfyui-start.sh
+#!/bin/bash
+cd ~/ComfyUI
+nohup python3 main.py --listen 127.0.0.1 --port 8188 > /tmp/comfyui.log 2>&1 &
+echo $! > /tmp/comfyui.pid
+echo "ComfyUI starting... check http://localhost:8188"
+sleep 5  # give it time to load models
 ```
 
 ```bash
-sudo systemctl enable comfyui
-sudo systemctl start comfyui
+# ~/scripts/comfyui-stop.sh
+#!/bin/bash
+if [ -f /tmp/comfyui.pid ]; then
+  kill $(cat /tmp/comfyui.pid) && rm /tmp/comfyui.pid
+  echo "ComfyUI stopped."
+else
+  pkill -f "main.py" && echo "ComfyUI stopped."
+fi
 ```
+
+```bash
+chmod +x ~/scripts/comfyui-start.sh ~/scripts/comfyui-stop.sh
+```
+
+I wired these into my AI assistant (OpenClaw) as a skill. When I say "generate an image", the skill automatically:
+
+1. Checks if ComfyUI is running (`curl -s localhost:8188/system_stats`)
+2. If not → runs `comfyui-start.sh` and waits for it to be ready
+3. Submits the generation request
+4. Returns the image
+5. Optionally stops ComfyUI after a timeout if no more requests come in
+
+This way the GPU is only loaded when actively generating. The rest of the time it's free for Ollama, coding agents, or whatever else needs it.
 
 ## Final Thoughts
 
