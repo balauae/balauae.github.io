@@ -102,21 +102,55 @@ cp ~/Downloads/z-image-turbo/ae.safetensors ComfyUI/models/vae/
 
 ## The Workflow
 
-Z-Image-Turbo uses an **AuraFlow**-based pipeline. The node graph looks like this:
+Z-Image-Turbo uses an **AuraFlow**-based pipeline. Here's the full node graph and what each component does:
 
 ```
-UNETLoader → ModelSamplingAuraFlow
-CLIPLoader → CLIPTextEncode → ConditioningZeroOut
-VAELoader  →
-                              ↓
-EmptySD3LatentImage → KSampler → VAEDecode → SaveImage
+┌─────────────────────────────────────────────────────────────┐
+│  UNETLoader (node 28)                                       │
+│    z_image_turbo_bf16.safetensors                           │
+│         ↓                                                   │
+│  ModelSamplingAuraFlow (node 11)   ← shift: 3              │
+│         ↓                                                   │
+│                    ┌──────────────────────────────────┐     │
+│  CLIPLoader (30)   │  CLIPTextEncode (27)             │     │
+│  qwen_3_4b         │    your prompt text              │     │
+│  type: lumina2     │         ↓           ↓            │     │
+│                    │  (positive)  ConditioningZeroOut │     │
+│                    │                (negative / 33)   │     │
+│                    └──────────────────────────────────┘     │
+│                                                             │
+│  EmptySD3LatentImage (13)  ← width, height, batch_size: 1  │
+│                                                             │
+│  VAELoader (29) ← ae.safetensors                           │
+│                                                             │
+│  All feeds into → KSampler (3) → VAEDecode (8) → SaveImage │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-Key settings:
-- **Steps:** 8 (sweet spot)
-- **Sampler:** euler
-- **Scheduler:** normal
-- **CFG:** 1.0 (distilled models don't need high CFG)
+### What each node does
+
+| Node | Role |
+|------|------|
+| **UNETLoader** | Loads the diffusion model (`z_image_turbo_bf16.safetensors`) |
+| **ModelSamplingAuraFlow** | Wraps the model with AuraFlow sampling (shift=3 adjusts noise schedule) |
+| **CLIPLoader** | Loads the text encoder (`qwen_3_4b.safetensors`, type: `lumina2`) |
+| **CLIPTextEncode** | Encodes your prompt into conditioning vectors |
+| **ConditioningZeroOut** | Creates empty (zeroed) negative conditioning — no negative prompt needed |
+| **EmptySD3LatentImage** | Creates a blank latent canvas at your target resolution |
+| **VAELoader** | Loads the VAE (`ae.safetensors`) for latent ↔ pixel conversion |
+| **KSampler** | Runs the denoising loop — the actual generation |
+| **VAEDecode** | Converts the output latent back into a pixel image |
+| **SaveImage** | Saves the result to disk |
+
+### KSampler settings
+
+```
+sampler:    res_multistep   (not euler — optimized for AuraFlow)
+scheduler:  simple
+steps:      8               (sweet spot for turbo)
+cfg:        1.0             (distilled models ignore CFG guidance)
+denoise:    1.0             (full generation from noise)
+```
 
 ## Automating It via API
 
