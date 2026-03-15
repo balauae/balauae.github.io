@@ -226,6 +226,43 @@ I wired these into my AI assistant (OpenClaw) as a skill. When I say "generate a
 
 This way the GPU is only loaded when actively generating. The rest of the time it's free for Ollama, coding agents, or whatever else needs it.
 
+## Going Further — More Workflows & Models
+
+Once you have the basics running, here's where to explore next:
+
+### 🔍 Find Workflows
+
+- **[ComfyUI Examples](https://comfyanonymous.github.io/ComfyUI_examples/)** — Official examples covering SDXL, ControlNet, inpainting, upscaling, video and more. Each comes with a downloadable workflow JSON.
+- **[OpenArt Workflows](https://openart.ai/workflows)** — Community-submitted workflows. Browse by model or use case. Great for finding ready-to-use pipelines.
+- **[CivitAI Workflows](https://civitai.com/)** — Models + matching workflows. Huge community library, especially for character and art styles.
+
+### 🤖 More Models to Try
+
+- **[FLUX.1](https://huggingface.co/black-forest-labs/FLUX.1-dev)** — State of the art photorealistic image generation. Heavier than Z-Image-Turbo but stunning quality. (Already have `flux2-dev.safetensors` locally!)
+- **[SDXL Turbo](https://huggingface.co/stabilityai/sdxl-turbo)** — Fast SDXL distilled model, similar turbo approach.
+- **[Stable Diffusion 3.5](https://huggingface.co/stabilityai/stable-diffusion-3.5-large)** — Latest from Stability AI.
+- **[PixArt-Σ](https://huggingface.co/PixArt-alpha/PixArt-Sigma-XL-2-1024-MS)** — Efficient transformer-based model, great for artistic styles.
+
+### 🎨 LoRAs (Style Add-ons)
+
+LoRAs are small files that steer the model toward a specific style. Drop them in `models/loras/` and add a `LoraLoader` node between `UNETLoader` and `KSampler`.
+
+- **[CivitAI LoRAs](https://civitai.com/models?type=LORA)** — Thousands of style/character LoRAs
+- Already have `pixel_art_style_z_image_turbo.safetensors` locally — try it with Z-Image-Turbo!
+
+### 📦 ComfyUI Manager
+
+Install [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) to install custom nodes directly from the UI — no manual git cloning needed. Unlocks ControlNet, IP-Adapter, face detailers, and hundreds of community extensions.
+
+```bash
+cd ComfyUI/custom_nodes
+git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+```
+
+Restart ComfyUI and you'll see a **Manager** button in the top menu.
+
+---
+
 ## Final Thoughts
 
 Local image generation with ComfyUI on a proper GPU is genuinely better than cloud APIs for personal use. It's faster, cheaper (free after hardware cost), and completely private.
