@@ -9,5 +9,6 @@ import { defineConfig } from 'astro/config';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://balauae.github.io',
+	base: '/',
 	integrations: [mdx(), sitemap()],
 });
