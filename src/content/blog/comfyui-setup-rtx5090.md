@@ -261,6 +261,26 @@ git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 
 Restart ComfyUI and you'll see a **Manager** button in the top menu.
 
+### 🔄 ComfyUI Alternatives
+
+ComfyUI isn't the only way to run Stable Diffusion locally. Here's how it compares:
+
+| Tool | Style | Best For |
+|------|-------|----------|
+| **[Automatic1111 (AUTOMATIC1111/stable-diffusion-webui)](https://github.com/AUTOMATIC1111/stable-diffusion-webui)** | Traditional UI with sliders | Beginners, quick generation, huge extension ecosystem |
+| **[Forge](https://github.com/lllyasviel/stable-diffusion-webui-forge)** | A1111 fork, optimized | Better VRAM efficiency, faster than A1111 |
+| **[InvokeAI](https://github.com/invoke-ai/InvokeAI)** | Canvas-based UI | Creative workflows, inpainting, professional use |
+| **[Fooocus](https://github.com/lllyasviel/Fooocus)** | Minimal UI | Zero-config, Midjourney-like simplicity |
+| **[SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI)** | Multi-backend | Power users, supports ComfyUI as a backend |
+
+**Why I use ComfyUI:**
+- Full control over every step of the pipeline
+- Scriptable via REST API — essential for automation
+- Runs the latest models (FLUX, AuraFlow) before other UIs support them
+- Node graph = reproducible, shareable workflows
+
+If you just want to generate images quickly without learning the internals, **Fooocus** or **Forge** are much simpler to get started with.
+
 ---
 
 ## Final Thoughts
