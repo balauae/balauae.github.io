@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI Demystified — JCE Seminar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES — STUDIO THEME
+   =========================================== */
+:root {
+    --stage-bg: #1C1C1C;
+    --slide-bg: #1C1C1C;
+    --surface: #242422;
+    --surface-alt: #2A2A28;
+    --yellow: #F5D200;
+    --yellow-dim: rgba(245,210,0,0.4);
+    --yellow-glow: rgba(245,210,0,0.08);
+    --white: #F0EDE6;
+    --white-dim: rgba(240,237,230,0.5);
+    --grey: #6B6B65;
+    --border: #2E2E2C;
+    --border-light: #3A3A38;
+    --cyan: #38BDF8;
+    --green: #34D399;
+    --red: #F87171;
+    --magenta: #E879F9;
+    --amber: #FBBF24;
+    --font-display: 'Barlow', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --slide-padding: 80px;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur: 0.5s;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* === VIEWPORT BASE === */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+@media print {
+    html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+    .deck-viewport { position: static; overflow: visible; background: #fff; }
+    .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+    .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; }
+    .slide:last-child { break-after: auto; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } }
+
+/* === CHROME === */
+.top-bar { position: absolute; top: 0; left: 0; right: 0; height: 56px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--slide-padding); z-index: 2; }
+.bottom-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 56px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 var(--slide-padding); z-index: 2; }
+.chrome { font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--yellow-dim); letter-spacing: 1px; text-transform: uppercase; }
+.yellow-bar { position: absolute; width: 8px; background: var(--yellow); z-index: 2; }
+
+/* === ANIMATIONS === */
+.rv { opacity: 0; transform: translateY(20px); transition: opacity var(--dur) var(--ease-out-expo), transform var(--dur) var(--ease-out-expo); }
+.slide.visible .rv { opacity: 1; transform: translateY(0); }
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}.d6{transition-delay:.6s}.d7{transition-delay:.7s}.d8{transition-delay:.8s}
+.rv-scale { opacity: 0; transform: scale(0.9); transition: opacity var(--dur) var(--ease-out-expo), transform var(--dur) var(--ease-out-expo); }
+.slide.visible .rv-scale { opacity: 1; transform: scale(1); }
+
+/* === TYPOGRAPHY === */
+.tag { font-family: var(--font-mono); font-size: 16px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--yellow-dim); margin-bottom: 8px; }
+.title { font-family: var(--font-display); font-weight: 900; font-size: 72px; line-height: 1.05; letter-spacing: -2px; text-transform: uppercase; color: var(--yellow); margin-bottom: 24px; }
+.title.lg { font-size: 84px; }
+.title.med { font-size: 64px; }
+.title.sm { font-size: 56px; }
+.body { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--white); line-height: 1.5; }
+.mono { font-family: var(--font-mono); font-size: 18px; color: var(--yellow); }
+.accent { width: 80px; height: 4px; background: var(--yellow); margin: 16px 0; }
+
+/* === COMPONENTS === */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+.card-y { border-left: 4px solid var(--yellow); }
+.badge { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; font-family: var(--font-display); font-weight: 900; font-size: 20px; flex-shrink: 0; }
+.badge-y { background: var(--yellow); color: var(--stage-bg); }
+.badge-o { border: 2px solid var(--yellow); color: var(--yellow); background: none; }
+.pill { display: inline-block; padding: 6px 14px; border: 1px solid var(--yellow); border-radius: 4px; font-family: var(--font-mono); font-size: 16px; font-weight: 500; color: var(--yellow); letter-spacing: 1px; }
+.pill-dim { border-color: var(--border-light); color: var(--grey); }
+.progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: var(--yellow); z-index: 999; transition: width 0.3s ease; }
+
+/* === TOKEN === */
+.tok { display: inline-flex; align-items: center; justify-content: center; padding: 10px 18px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--white); background: var(--surface); }
+.tok.blank { border-color: var(--yellow); color: var(--yellow); min-width: 90px; }
+.prob { display: flex; align-items: center; gap: 14px; font-family: var(--font-mono); font-size: 20px; }
+.prob-bar { height: 12px; border-radius: 6px; background: var(--yellow); }
+
+/* === CHAT === */
+.chat-user { padding: 14px 20px; border-radius: 12px; font-family: var(--font-display); font-size: 24px; font-weight: 500; max-width: 460px; line-height: 1.4; background: rgba(245,210,0,0.08); border: 1px solid rgba(245,210,0,0.2); color: var(--yellow); }
+.chat-bot { padding: 14px 20px; border-radius: 12px; font-family: var(--font-display); font-size: 24px; font-weight: 500; max-width: 460px; line-height: 1.4; background: var(--surface); border: 1px solid var(--border); color: var(--white); }
+.astep { display: flex; align-items: center; gap: 16px; padding: 12px 18px; border-left: 3px solid var(--yellow); margin-left: 8px; }
+.astep .lbl { font-family: var(--font-display); font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; color: var(--yellow); width: 60px; }
+.astep.done { border-left-color: var(--green); }
+.astep.done .lbl { color: var(--green); }
+
+/* === ARCH === */
+.arch { display: flex; align-items: center; gap: 18px; padding: 20px 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.arch .icon { font-size: 32px; flex-shrink: 0; }
+.arch .nm { font-family: var(--font-display); font-weight: 900; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+.arch .sub { font-family: var(--font-display); font-size: 16px; color: var(--grey); }
+
+/* === AGENT ROW === */
+.arow { display: flex; align-items: center; gap: 20px; padding: 16px 24px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.arow .cat { font-family: var(--font-display); font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; width: 120px; flex-shrink: 0; }
+.arow .names { font-family: var(--font-display); font-size: 20px; font-weight: 500; color: var(--white); flex: 1; }
+.arow .impact { font-family: var(--font-mono); font-size: 14px; color: var(--grey); text-align: right; width: 280px; flex-shrink: 0; }
+
+/* === LADDER === */
+.lstep { display: flex; align-items: center; gap: 16px; padding: 16px 24px; border-radius: 8px; background: var(--surface); border-left: 4px solid; }
+.lstep .num { font-family: var(--font-display); font-weight: 900; font-size: 20px; width: 32px; text-align: center; }
+.lstep .nm { font-family: var(--font-display); font-weight: 700; font-size: 24px; color: var(--white); text-transform: uppercase; letter-spacing: 1px; }
+
+/* === CODE === */
+.code { background: #161616; border: 1px solid var(--border); border-radius: 8px; padding: 28px 32px; font-family: var(--font-mono); font-size: 18px; line-height: 1.65; color: var(--white); white-space: pre-wrap; overflow: hidden; }
+.kw{color:var(--magenta)}.fn{color:var(--cyan)}.str{color:var(--green)}.cm{color:var(--grey)}.nm{color:var(--amber)}
+
+/* === MCP === */
+.mcp-node { padding: 16px; border: 1px solid var(--border); border-radius: 8px; text-align: center; font-family: var(--font-display); font-weight: 900; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; background: var(--surface); color: var(--white); }
+.mcp-hub { padding: 18px 36px; border: 3px solid var(--yellow); border-radius: 8px; text-align: center; font-family: var(--font-display); font-weight: 900; font-size: 28px; letter-spacing: 4px; color: var(--yellow); background: var(--yellow-glow); }
+.mcp-conn { width: 3px; height: 20px; background: var(--yellow-dim); margin: 0 auto; }
+
+/* === QR === */
+.qr { width: 280px; height: 280px; border: 3px dashed var(--yellow-dim); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; font-family: var(--font-mono); font-size: 16px; color: var(--grey); background: var(--yellow-glow); }
+.qr.sm { width: 140px; height: 140px; font-size: 12px; }
+
+/* === DOT ROW === */
+.drow { display: flex; align-items: center; gap: 24px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+.drow:last-child { border-bottom: none; }
+
+/* === INLINE EDITING === */
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 16px; left: 16px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 10001; background: var(--surface); border: 1px solid var(--border); color: var(--yellow); font-family: var(--font-mono); font-size: 14px; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+[contenteditable="true"] { outline: 1px dashed var(--yellow); outline-offset: 2px; cursor: text; }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+<!-- ===== 1: TITLE ===== -->
+<section class="slide active" data-slide="1">
+    <div class="top-bar"><span class="chrome">Agentic AI Demystified</span><span class="chrome">01 / 20</span></div>
+    <div class="yellow-bar" style="left:var(--slide-padding);top:100px;height:520px"></div>
+    <div style="position:absolute;left:120px;top:120px">
+        <div class="rv" style="font-family:var(--font-display);font-weight:900;font-size:180px;line-height:0.88;letter-spacing:-6px;text-transform:uppercase;color:var(--yellow)">AGENTIC<br>AI</div>
+    </div>
+    <div style="position:absolute;left:120px;bottom:160px">
+        <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:52px;text-transform:uppercase;letter-spacing:2px;color:var(--yellow);opacity:0.6">DEMYSTIFIED</div>
+    </div>
+    <div style="position:absolute;right:var(--slide-padding);top:140px;text-align:right">
+        <div class="rv d3 chrome" style="font-size:16px;line-height:2">Concepts<br>Architecture<br>Your First Agent</div>
+    </div>
+    <div class="bottom-bar">
+        <span class="chrome">Prasanna Veerapandi (Bala) — bSigma AI</span>
+        <span class="chrome">JCE Chennai — Sept 4, 2026</span>
+    </div>
+</section>
+
+<!-- ===== 2: HOOK — QR ===== -->
+<section class="slide" data-slide="2">
+    <div class="top-bar"><span class="chrome">Interactive</span><span class="chrome">02 / 20</span></div>
+    <div class="yellow-bar rv d1" style="left:var(--slide-padding);top:100px;height:400px"></div>
+    <div style="position:absolute;left:120px;top:120px;max-width:900px">
+        <div class="title rv">TRY THIS<br>RIGHT NOW</div>
+        <div class="body rv d2" style="margin-bottom:20px">Scan the QR code.<br>Ask it anything about your college.</div>
+        <div class="rv d3" style="font-family:var(--font-display);font-size:36px;font-weight:900;color:var(--yellow);text-transform:uppercase">📱 Pull out your phones.</div>
+    </div>
+    <div style="position:absolute;right:200px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:20px">
+        <div class="qr rv-scale d3"><span style="font-size:48px">📷</span>[ QR CODE ]<br><span style="font-size:12px">Replace with actual QR</span></div>
+        <div class="rv d4" style="font-family:var(--font-display);font-size:20px;color:var(--grey);text-align:center;max-width:300px">JCE Campus Guru — your college's AI agent, live on your phone</div>
+    </div>
+    <div class="bottom-bar"><span class="chrome">JCE Campus Guru</span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 3: NEXT-TOKEN PREDICTION ===== -->
+<section class="slide" data-slide="3">
+    <div class="top-bar"><span class="chrome">GenAI Foundations</span><span class="chrome">03 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">GenAI Foundations</div>
+        <div class="title rv d1">PREDICTING THE<br>NEXT TOKEN</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:320px">
+        <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:20px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow-dim);margin-bottom:20px">HOW DOES CHATGPT "THINK"?</div>
+        <div class="rv d3" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:36px">
+            <span class="tok">The</span><span class="tok">quick</span><span class="tok">brown</span><span class="tok">fox</span><span class="tok">jumps</span><span class="tok">over</span><span class="tok">the</span><span class="tok blank">___</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-left:8px;width:600px">
+            <div class="prob rv d4"><span style="color:var(--green);width:100px">lazy</span><div class="prob-bar" style="width:340px"></div><span style="color:var(--grey);margin-left:12px">92%</span></div>
+            <div class="prob rv d4"><span style="color:var(--grey);width:100px">sleeping</span><div class="prob-bar" style="width:18px;opacity:0.4"></div><span style="color:var(--grey);margin-left:12px">4%</span></div>
+            <div class="prob rv d4"><span style="color:var(--grey);width:100px">red</span><div class="prob-bar" style="width:8px;opacity:0.2"></div><span style="color:var(--grey);margin-left:12px">2%</span></div>
+        </div>
+    </div>
+    <div style="position:absolute;right:120px;top:50%;transform:translateY(-50%);width:580px">
+        <div class="card card-y rv d5" style="padding:32px">
+            <div style="font-family:var(--font-display);font-weight:900;font-size:28px;color:var(--yellow);text-transform:uppercase;margin-bottom:16px">It's Just Statistics</div>
+            <div class="body" style="font-size:24px;line-height:1.7">
+                The model reads all previous tokens and calculates: <strong style="color:var(--yellow)">"What word is most likely next?"</strong><br><br>
+                Do this billions of times across the internet's text → the model learns language, reasoning, even code.
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="rv d6 body" style="font-size:26px;color:var(--white)">Every answer you've ever gotten from AI started with predicting <span style="color:var(--yellow);font-weight:900">one token at a time.</span></div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 4: THE LLM ===== -->
+<section class="slide" data-slide="4">
+    <div class="top-bar"><span class="chrome">GenAI Foundations</span><span class="chrome">04 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">GenAI Foundations</div>
+        <div class="title rv d1">THE LLM<br>MACHINE</div>
+    </div>
+    <div style="position:absolute;left:50%;top:48%;transform:translate(-50%,-50%)">
+        <div class="rv d2" style="display:flex;align-items:center;gap:60px;justify-content:center;margin-bottom:60px">
+            <div style="text-align:center"><div style="font-family:var(--font-display);font-size:36px;font-weight:900;color:var(--yellow);text-transform:uppercase">Input</div><div class="chrome" style="font-size:18px;margin-top:4px">tokens</div><div style="font-family:var(--font-display);font-size:22px;color:var(--grey);margin-top:8px">"What is a neural network?"</div></div>
+            <div style="font-size:48px;color:var(--grey)">→</div>
+            <div style="width:300px;height:180px;border:4px solid var(--yellow);border-radius:20px;display:flex;align-items:center;justify-content:center;background:var(--yellow-glow)">
+                <div style="text-align:center"><div style="font-family:var(--font-display);font-weight:900;font-size:44px;color:var(--yellow);text-transform:uppercase">LLM</div><div style="font-family:var(--font-display);font-size:20px;color:var(--grey)">175B+ parameters</div></div>
+            </div>
+            <div style="font-size:48px;color:var(--grey)">→</div>
+            <div style="text-align:center"><div style="font-family:var(--font-display);font-size:36px;font-weight:900;color:var(--yellow);text-transform:uppercase">Output</div><div class="chrome" style="font-size:18px;margin-top:4px">tokens</div><div style="font-family:var(--font-display);font-size:22px;color:var(--grey);margin-top:8px">"A model inspired by the brain..."</div></div>
+        </div>
+        <div class="rv d3" style="display:flex;gap:28px;justify-content:center">
+            <div class="card card-y" style="width:360px;text-align:center;padding:28px">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:28px;color:var(--yellow);text-transform:uppercase">Tokens</div>
+                <div style="font-family:var(--font-display);font-size:22px;color:var(--grey);margin-top:8px">Atoms of text — "neural" + "network" = 2 tokens</div>
+            </div>
+            <div class="card card-y" style="width:360px;text-align:center;padding:28px">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:28px;color:var(--yellow);text-transform:uppercase">Context</div>
+                <div style="font-family:var(--font-display);font-size:22px;color:var(--grey);margin-top:8px">128K+ token window — ~300 pages of text at once</div>
+            </div>
+            <div class="card card-y" style="width:360px;text-align:center;padding:28px">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:28px;color:var(--yellow);text-transform:uppercase">Parameters</div>
+                <div style="font-family:var(--font-display);font-size:22px;color:var(--grey);margin-top:8px">Billions of learned weights — compressed knowledge</div>
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="rv d5 body" style="font-size:32px">We went from rule-based bots to <span style="color:var(--yellow);font-weight:900">understanding any question in any language.</span></div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 5: WHAT LLMs CHANGED ===== -->
+<section class="slide" data-slide="5">
+    <div class="top-bar"><span class="chrome">The Leap Forward</span><span class="chrome">05 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">Appreciate This</div>
+        <div class="title rv d1">WHAT LLMs<br>CHANGED</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:310px;display:flex;gap:60px">
+        <div style="width:780px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:18px;border-bottom:2px solid var(--red);padding-bottom:10px">BEFORE LLMs (Pre-2022)</div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+                <div class="rv d3" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Hard-coded rules for every question</span></div>
+                <div class="rv d3" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Months to build one chatbot for one domain</span></div>
+                <div class="rv d3" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">"Sorry, I didn't understand that" — constantly</span></div>
+                <div class="rv d4" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Separate ML model for each task — NER, sentiment, translation</span></div>
+                <div class="rv d4" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Needed thousands of labeled examples to train</span></div>
+            </div>
+        </div>
+        <div style="width:780px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:18px;border-bottom:2px solid var(--green);padding-bottom:10px">WITH LLMs (Now)</div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+                <div class="rv d5" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">Understands any question in natural language</span></div>
+                <div class="rv d5" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">One model — code, translate, reason, create</span></div>
+                <div class="rv d5" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">Works in 100+ languages out of the box</span></div>
+                <div class="rv d6" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">Zero-shot — no training data needed, just ask</span></div>
+                <div class="rv d6" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">You can build in a weekend what took teams a year</span></div>
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="rv d7" style="font-family:var(--font-display);font-size:32px;font-weight:900;color:var(--white);text-transform:uppercase">This is incredible. <span style="color:var(--yellow)">But there's still one gap...</span></div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 6: THE GAP ===== -->
+<section class="slide" data-slide="6">
+    <div class="top-bar"><span class="chrome">The Gap</span><span class="chrome">06 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">The Gap</div>
+        <div class="title rv d1">LLMs CAN THINK.<br>THEY CAN'T ACT.</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:310px;display:flex;gap:60px">
+        <div style="width:780px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:18px;border-bottom:2px solid var(--green);padding-bottom:10px">WHAT LLMs CAN DO</div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+                <div class="rv d3" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">Summarize 50 pages into 5 bullets</span></div>
+                <div class="rv d3" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">Translate between 100+ languages</span></div>
+                <div class="rv d3" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">Explain quantum physics simply</span></div>
+                <div class="rv d4" style="display:flex;gap:14px;align-items:center"><span style="color:var(--green);font-size:26px;font-weight:900">✓</span><span class="body" style="font-size:24px">Write code from a description</span></div>
+            </div>
+        </div>
+        <div style="width:780px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:18px;border-bottom:2px solid var(--red);padding-bottom:10px">WHAT LLMs CAN'T DO</div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+                <div class="rv d5" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Check today's actual weather</span></div>
+                <div class="rv d5" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Book a flight or hotel</span></div>
+                <div class="rv d5" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Query your college database</span></div>
+                <div class="rv d6" style="display:flex;gap:14px;align-items:center"><span style="color:var(--red);font-size:26px;font-weight:900">✗</span><span class="body" style="font-size:24px">Send an email or browse a website</span></div>
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="rv d7" style="font-family:var(--font-display);font-size:32px;font-weight:900;color:var(--white);text-transform:uppercase">Knowledge extractors, not actors. <span style="color:var(--yellow)">What if we gave them hands?</span></div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 6: WHAT IS AN AGENT? (NEW) ===== -->
+<section class="slide" data-slide="7">
+    <div class="top-bar"><span class="chrome">The Definition</span><span class="chrome">07 / 20</span></div>
+    <div class="yellow-bar rv d1" style="left:var(--slide-padding);top:200px;height:340px"></div>
+    <div style="position:absolute;left:120px;top:50%;transform:translateY(-50%);max-width:1400px">
+        <div class="tag rv">So What Is An Agent?</div>
+        <div class="rv d1" style="font-family:var(--font-display);font-weight:900;font-size:56px;line-height:1.15;color:var(--yellow);text-transform:uppercase;margin-bottom:32px">"AN LLM THAT RUNS IN A LOOP,<br>USING TOOLS TO<br>ACCOMPLISH TASKS."</div>
+        <div class="rv d2" style="font-family:var(--font-display);font-size:22px;color:var(--grey);margin-bottom:40px">— Anthropic, "Building Effective Agents"</div>
+        <div class="rv d3" style="display:flex;gap:24px">
+            <div class="card" style="padding:20px 28px;flex:1;text-align:center">
+                <div style="font-size:36px;margin-bottom:8px">🧠</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:22px;color:var(--yellow);text-transform:uppercase">LLM</div>
+                <div style="font-family:var(--font-display);font-size:18px;color:var(--grey)">Does the thinking</div>
+            </div>
+            <div style="font-size:32px;color:var(--grey);align-self:center">+</div>
+            <div class="card" style="padding:20px 28px;flex:1;text-align:center">
+                <div style="font-size:36px;margin-bottom:8px">🔧</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:22px;color:var(--amber);text-transform:uppercase">Tools</div>
+                <div style="font-family:var(--font-display);font-size:18px;color:var(--grey)">Does the acting</div>
+            </div>
+            <div style="font-size:32px;color:var(--grey);align-self:center">+</div>
+            <div class="card" style="padding:20px 28px;flex:1;text-align:center">
+                <div style="font-size:36px;margin-bottom:8px">🔄</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:22px;color:var(--cyan);text-transform:uppercase">Loop</div>
+                <div style="font-family:var(--font-display);font-size:18px;color:var(--grey)">Keeps going until done</div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 7: CHATBOT vs AGENT ===== -->
+<section class="slide" data-slide="8">
+    <div class="top-bar"><span class="chrome">The Leap</span><span class="chrome">08 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">The Leap</div>
+        <div class="title rv d1">CHATBOT<br>VS. AGENT</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:310px;display:flex;gap:80px">
+        <div style="width:700px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);margin-bottom:18px;border-bottom:2px solid var(--border);padding-bottom:10px">CHATBOT</div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+                <div class="chat-user rv d3">What flights to Delhi?</div>
+                <div class="chat-bot rv d4">Here are some options:<br>• IndiGo 6E-123<br>• Air India AI-456<br>• SpiceJet SG-789</div>
+                <div class="rv d5" style="font-family:var(--font-display);font-size:22px;color:var(--grey);font-style:italic;text-align:center;margin-top:12px">(you still have to book it yourself)</div>
+            </div>
+        </div>
+        <div style="width:700px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow);margin-bottom:18px;border-bottom:2px solid var(--yellow);padding-bottom:10px">AGENT</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div class="chat-user rv d3" style="align-self:flex-start">Book me a flight to Delhi tomorrow</div>
+                <div class="astep rv d4"><span class="lbl">Think</span><span class="body" style="font-size:22px">Search flights, pick best, book it</span></div>
+                <div class="astep rv d5"><span class="lbl">Act</span><span class="mono">→ search_flights(DEL, tomorrow)</span></div>
+                <div class="astep rv d6"><span class="lbl">Act</span><span class="mono">→ book_flight(6E-123, seat 12A)</span></div>
+                <div class="astep done rv d7"><span class="lbl">Done</span><span class="body" style="font-size:22px;color:var(--green)">Booked! IndiGo 6E-123, 8:30 AM ✓</span></div>
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="rv d8" style="font-family:var(--font-display);font-size:32px;font-weight:700;color:var(--white)">A chatbot <span style="color:var(--grey)">tells</span> you. An agent <span style="color:var(--yellow);font-weight:900">does it</span> for you.</div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 8b: AGENTS SHIPPING TODAY ===== -->
+<section class="slide" data-slide="9">
+    <div class="top-bar"><span class="chrome">In The Real World</span><span class="chrome">09 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">In The Real World</div>
+        <div class="title rv d1">AGENTS SHIPPING TODAY</div>
+    </div>
+    <!-- Two-column: GLOBAL vs INDIA -->
+    <div style="position:absolute;left:var(--slide-padding);top:260px;right:var(--slide-padding);display:grid;grid-template-columns:1fr 1fr;gap:40px">
+        <!-- GLOBAL Column -->
+        <div class="rv d2">
+            <div style="font-family:var(--font-display);font-weight:900;font-size:28px;letter-spacing:3px;text-transform:uppercase;color:var(--yellow);margin-bottom:24px;padding-bottom:12px;border-bottom:3px solid var(--yellow)">GLOBAL</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--yellow)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--yellow-dim);min-width:100px">CODING</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Claude Code</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— terminal agent that writes, tests & ships code</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--cyan)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);min-width:100px">APP BUILD</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Replit Agent</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— prompt to deployed full-stack app</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--green)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--green);min-width:100px">RESEARCH</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Perplexity</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— real-time web research with citations</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--magenta)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--magenta);min-width:100px">IMAGE</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Midjourney</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— photorealistic image generation from text</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--amber)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--amber);min-width:100px">VIDEO</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Runway</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— text/image to cinematic video clips</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--white)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--grey);min-width:100px">SUPPORT</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Intercom Fin</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— resolves 50% of tickets autonomously</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--yellow)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--yellow-dim);min-width:100px">CRM</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Salesforce</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— Agentforce: autonomous sales workflows</span>
+                </div>
+            </div>
+        </div>
+        <!-- INDIA Column -->
+        <div class="rv d3">
+            <div style="font-family:var(--font-display);font-weight:900;font-size:28px;letter-spacing:3px;text-transform:uppercase;color:var(--magenta);margin-bottom:24px;padding-bottom:12px;border-bottom:3px solid var(--magenta)">INDIA 🇮🇳</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--magenta)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--magenta);min-width:100px">SOVEREIGN AI</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Sarvam AI</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— India's $1.5B unicorn; 22 language models</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--yellow)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--yellow-dim);min-width:100px">CHATBOTS</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Yellow.ai</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— enterprise bots in 135+ languages</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--amber)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--amber);min-width:100px">FOOD TECH</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Swiggy AI</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— AI-native ordering across 720 cities</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--cyan)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);min-width:100px">SHOPPING</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Flipkart SLAP</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— conversational commerce assistant</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--green)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--green);min-width:100px">BUSINESS</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Zoho Zia</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— Chennai-built CRM + 700 AI actions</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--white)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--grey);min-width:100px">MULTILINGUAL</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Krutrim</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— India's 1st AI unicorn; native Indic LLM</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:10px;padding:10px 14px;background:var(--surface);border-radius:6px;border-left:3px solid var(--yellow)">
+                    <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--yellow-dim);min-width:100px">GPU INFRA</span>
+                    <span style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white)">Neysa</span>
+                    <span style="font-family:var(--font-display);font-size:15px;color:var(--grey)">— $1.2B GPU cloud powering Indian AI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 8: AGENT LOOP ===== -->
+<section class="slide" data-slide="10">
+    <div class="top-bar"><span class="chrome">The Core Concept</span><span class="chrome">10 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">The Core Concept</div>
+        <div class="title rv d1">THE AGENT LOOP</div>
+    </div>
+    <!-- Left: Worked example -->
+    <div style="position:absolute;left:var(--slide-padding);top:280px;width:680px">
+        <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:18px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow-dim);margin-bottom:16px">EXAMPLE: "What events are happening this month?"</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="rv d2" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-left:4px solid var(--yellow);background:var(--surface);border-radius:0 6px 6px 0">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:16px;color:var(--yellow);width:28px;text-align:center">1</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--yellow);text-transform:uppercase;width:90px">Perceive</div>
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--white)">User asks about upcoming campus events</div>
+            </div>
+            <div class="rv d3" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-left:4px solid var(--amber);background:var(--surface);border-radius:0 6px 6px 0">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:16px;color:var(--amber);width:28px;text-align:center">2</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--amber);text-transform:uppercase;width:90px">Reason</div>
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--white)">I need <span class="mono" style="font-size:17px">get_events('sept')</span></div>
+            </div>
+            <div class="rv d4" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-left:4px solid var(--magenta);background:var(--surface);border-radius:0 6px 6px 0">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:16px;color:var(--magenta);width:28px;text-align:center">3</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--magenta);text-transform:uppercase;width:90px">Act</div>
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--white)">Tool returns: Hackathon, Tech Fest, Workshop...</div>
+            </div>
+            <div class="rv d5" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-left:4px solid var(--cyan);background:var(--surface);border-radius:0 6px 6px 0">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:16px;color:var(--cyan);width:28px;text-align:center">4</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--cyan);text-transform:uppercase;width:90px">Observe</div>
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--white)">Got what I need — format and respond</div>
+            </div>
+            <div class="rv d5" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-left:4px solid var(--green);background:var(--surface);border-radius:0 6px 6px 0">
+                <div style="font-family:var(--font-display);font-weight:900;font-size:16px;color:var(--green);width:28px;text-align:center">✓</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--green);text-transform:uppercase;width:90px">Done</div>
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--green)">1 loop, 1 tool call, ~2 seconds</div>
+            </div>
+        </div>
+    </div>
+    <!-- Right: Visual loop diagram -->
+    <div style="position:absolute;right:120px;top:50%;transform:translateY(-50%);width:560px;height:560px">
+        <!-- Orbit ring -->
+        <div class="rv d2" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:380px;height:380px;border-radius:50%;border:3px solid var(--border-light);opacity:0.35"></div>
+        <!-- Arrow arcs using rotated ▸ characters along the orbit -->
+        <div class="rv d3" style="position:absolute;top:52px;right:72px;font-family:var(--font-display);font-size:28px;color:var(--yellow);transform:rotate(40deg)">▸</div>
+        <div class="rv d4" style="position:absolute;bottom:72px;right:52px;font-family:var(--font-display);font-size:28px;color:var(--yellow);transform:rotate(130deg)">▸</div>
+        <div class="rv d5" style="position:absolute;bottom:52px;left:72px;font-family:var(--font-display);font-size:28px;color:var(--yellow);transform:rotate(220deg)">▸</div>
+        <div class="rv d6" style="position:absolute;top:72px;left:52px;font-family:var(--font-display);font-size:28px;color:var(--yellow);transform:rotate(310deg)">▸</div>
+        <!-- Top: Perceive -->
+        <div class="rv-scale d2" style="position:absolute;left:50%;top:0;transform:translateX(-50%);text-align:center">
+            <div style="width:160px;height:160px;border-radius:50%;border:4px solid var(--yellow);display:flex;align-items:center;justify-content:center;background:var(--yellow-glow)">
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:36px;color:var(--yellow);line-height:1">1</div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--yellow);text-transform:uppercase;margin-top:4px">Perceive</div></div>
+            </div>
+        </div>
+        <!-- Right: Reason -->
+        <div class="rv-scale d3" style="position:absolute;right:0;top:50%;transform:translateY(-50%);text-align:center">
+            <div style="width:160px;height:160px;border-radius:50%;border:4px solid var(--amber);display:flex;align-items:center;justify-content:center;background:rgba(251,191,36,0.06)">
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:36px;color:var(--amber);line-height:1">2</div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--amber);text-transform:uppercase;margin-top:4px">Reason</div></div>
+            </div>
+        </div>
+        <!-- Bottom: Act -->
+        <div class="rv-scale d4" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);text-align:center">
+            <div style="width:160px;height:160px;border-radius:50%;border:4px solid var(--magenta);display:flex;align-items:center;justify-content:center;background:rgba(232,121,249,0.06)">
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:36px;color:var(--magenta);line-height:1">3</div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--magenta);text-transform:uppercase;margin-top:4px">Act</div></div>
+            </div>
+        </div>
+        <!-- Left: Observe -->
+        <div class="rv-scale d5" style="position:absolute;left:0;top:50%;transform:translateY(-50%);text-align:center">
+            <div style="width:160px;height:160px;border-radius:50%;border:4px solid var(--cyan);display:flex;align-items:center;justify-content:center;background:rgba(56,189,248,0.06)">
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:36px;color:var(--cyan);line-height:1">4</div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--cyan);text-transform:uppercase;margin-top:4px">Observe</div></div>
+            </div>
+        </div>
+        <!-- Center -->
+        <div class="rv d6" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center">
+            <div style="font-family:var(--font-display);font-weight:900;font-size:32px;color:var(--yellow);text-transform:uppercase;letter-spacing:3px">LOOP</div>
+            <div style="font-family:var(--font-display);font-size:18px;color:var(--grey)">until task complete</div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="card card-y rv d7" style="display:inline-block;padding:14px 24px">
+            <span class="body" style="font-size:24px">"Agents are just LLMs using tools based on environmental feedback in a loop" <span style="color:var(--grey)">— Anthropic</span></span>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 9: ARCHITECTURE ===== -->
+<section class="slide" data-slide="11">
+    <div class="top-bar"><span class="chrome">Architecture</span><span class="chrome">11 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">Architecture</div>
+        <div class="title rv d1">INSIDE AN<br>AI AGENT</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);right:var(--slide-padding);top:300px;display:flex;flex-direction:column;align-items:center;gap:20px">
+        <!-- LLM Core -->
+        <div class="rv-scale d2" style="width:480px;padding:24px 32px;border:3px solid var(--yellow);border-radius:12px;background:var(--yellow-glow);display:flex;align-items:center;justify-content:center;gap:16px">
+            <div style="font-size:40px">🧠</div>
+            <div style="text-align:left"><div style="font-family:var(--font-display);font-weight:900;font-size:28px;color:var(--yellow);text-transform:uppercase;letter-spacing:2px">LLM CORE</div><div style="font-family:var(--font-display);font-size:18px;color:var(--grey)">Reasoning + planning + decisions</div></div>
+        </div>
+        <!-- Connector -->
+        <div class="rv d3" style="width:3px;height:16px;background:var(--yellow-dim)"></div>
+        <!-- 3 components row -->
+        <div style="display:flex;gap:20px;width:100%">
+            <div class="card rv d3" style="flex:1;padding:24px;border-top:4px solid var(--amber);text-align:center">
+                <div style="font-size:36px;margin-bottom:8px">🔧</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:24px;color:var(--amber);text-transform:uppercase;letter-spacing:1px">Tools</div>
+                <div style="font-family:var(--font-display);font-size:18px;color:var(--grey);margin-top:8px">The Hands</div>
+                <div style="font-family:var(--font-display);font-size:16px;color:var(--grey);margin-top:4px">Custom functions + MCP (open standard — "USB-C for AI")</div>
+            </div>
+            <div class="card rv d4" style="flex:1;padding:24px;border-top:4px solid var(--cyan);text-align:center">
+                <div style="font-size:36px;margin-bottom:8px">📓</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:24px;color:var(--cyan);text-transform:uppercase;letter-spacing:1px">Memory</div>
+                <div style="font-family:var(--font-display);font-size:18px;color:var(--grey);margin-top:8px">The Notebook</div>
+                <div style="font-family:var(--font-display);font-size:16px;color:var(--grey);margin-top:4px">Short-term (context) + Long-term (stored)</div>
+            </div>
+            <div class="card rv d5" style="flex:1;padding:24px;border-top:4px solid var(--green);text-align:center">
+                <div style="font-size:36px;margin-bottom:8px">🛡️</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:24px;color:var(--green);text-transform:uppercase;letter-spacing:1px">Guardrails</div>
+                <div style="font-family:var(--font-display);font-size:18px;color:var(--grey);margin-top:8px">The Safety Net</div>
+                <div style="font-family:var(--font-display);font-size:16px;color:var(--grey);margin-top:4px">System prompt rules + tool-level hooks</div>
+            </div>
+        </div>
+        <!-- Analogy row -->
+        <div class="rv d6" style="display:flex;gap:16px;width:100%;margin-top:8px">
+            <div style="flex:1;text-align:center;padding:16px 20px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--white)"><span style="color:var(--yellow);font-weight:900">You</span> define the tools</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:16px 20px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--white)"><span style="color:var(--yellow);font-weight:900">LLM</span> decides which to use</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:16px 20px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--white)"><span style="color:var(--yellow);font-weight:900">Your code</span> executes them</div>
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="rv d7" style="font-family:var(--font-display);font-size:32px;font-weight:900;color:var(--white);text-transform:uppercase">Four components. One loop. <span style="color:var(--yellow)">That's an agent.</span></div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 10: TOOL USE ===== -->
+<section class="slide" data-slide="12">
+    <div class="top-bar"><span class="chrome">How It Works</span><span class="chrome">12 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">How It Works</div>
+        <div class="title med rv d1">HOW TOOL<br>USE WORKS</div>
+    </div>
+    <!-- Sequence diagram: 4 lifelines with numbered arrows -->
+    <div style="position:absolute;left:80px;top:280px;width:1760px;height:670px">
+        <!-- Actor headers -->
+        <div class="rv d1" style="position:absolute;left:40px;top:0;width:180px;height:50px;border:2px solid var(--white);border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--white)">USER</div>
+        <div class="rv d1" style="position:absolute;left:460px;top:0;width:220px;height:50px;border:2px solid var(--yellow);border-radius:8px;background:var(--yellow-glow);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow)">AGENT</div>
+        <div class="rv d1" style="position:absolute;left:960px;top:0;width:220px;height:50px;border:2px solid var(--cyan);border-radius:8px;background:rgba(56,189,248,0.06);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan)">LLM</div>
+        <div class="rv d1" style="position:absolute;left:1440px;top:0;width:260px;height:50px;border:2px solid var(--amber);border-radius:8px;background:rgba(251,191,36,0.06);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--amber)">SANDBOX</div>
+        <!-- SVG lifelines + arrows -->
+        <svg style="position:absolute;top:0;left:0;width:1760px;height:670px;pointer-events:none" viewBox="0 0 1760 670">
+            <!-- Lifelines (dashed vertical) -->
+            <line x1="130" y1="56" x2="130" y2="660" stroke="#555" stroke-width="1.5" stroke-dasharray="6,8" opacity="0.35"/>
+            <line x1="570" y1="56" x2="570" y2="660" stroke="#F5D200" stroke-width="1.5" stroke-dasharray="6,8" opacity="0.25"/>
+            <line x1="1070" y1="56" x2="1070" y2="660" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6,8" opacity="0.25"/>
+            <line x1="1570" y1="56" x2="1570" y2="660" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,8" opacity="0.25"/>
+            <!-- Arrow 1: USER → AGENT -->
+            <line x1="145" y1="105" x2="555" y2="105" stroke="#F5D200" stroke-width="2.5"/>
+            <polygon points="550,99 563,105 550,111" fill="#F5D200"/>
+            <!-- Arrow 2: AGENT → LLM -->
+            <line x1="585" y1="185" x2="1055" y2="185" stroke="#38bdf8" stroke-width="2.5"/>
+            <polygon points="1050,179 1063,185 1050,191" fill="#38bdf8"/>
+            <!-- Arrow 3: LLM → AGENT (return) -->
+            <line x1="1055" y1="265" x2="585" y2="265" stroke="#38bdf8" stroke-width="2" stroke-dasharray="8,5"/>
+            <polygon points="590,259 577,265 590,271" fill="#38bdf8"/>
+            <!-- Arrow 4: AGENT → SANDBOX -->
+            <line x1="585" y1="345" x2="1555" y2="345" stroke="#fbbf24" stroke-width="2.5"/>
+            <polygon points="1550,339 1563,345 1550,351" fill="#fbbf24"/>
+            <!-- Arrow 5: SANDBOX → AGENT (return) -->
+            <line x1="1555" y1="425" x2="585" y2="425" stroke="#fbbf24" stroke-width="2" stroke-dasharray="8,5"/>
+            <polygon points="590,419 577,425 590,431" fill="#fbbf24"/>
+            <!-- Arrow 6: AGENT → LLM -->
+            <line x1="585" y1="505" x2="1055" y2="505" stroke="#38bdf8" stroke-width="2.5"/>
+            <polygon points="1050,499 1063,505 1050,511" fill="#38bdf8"/>
+            <!-- Arrow 7: LLM → AGENT → USER (combined return) -->
+            <line x1="1055" y1="575" x2="145" y2="575" stroke="#34d399" stroke-width="2" stroke-dasharray="8,5"/>
+            <polygon points="150,569 137,575 150,581" fill="#34d399"/>
+        </svg>
+        <!-- Arrow labels — positioned ABOVE arrows with clear gap -->
+        <div class="rv d2" style="position:absolute;left:200px;top:78px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:15px;color:var(--yellow)"><span class="badge badge-y" style="width:26px;height:26px;font-size:13px">1</span><span style="font-family:var(--font-display);font-weight:700;font-size:17px">"What events this month?"</span></span>
+        </div>
+        <div class="rv d3" style="position:absolute;left:630px;top:158px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:15px;color:var(--cyan)"><span class="badge badge-y" style="width:26px;height:26px;font-size:13px;background:var(--cyan);color:var(--stage-bg)">2</span><span style="font-family:var(--font-display);font-weight:700;font-size:16px">prompt + tool definitions</span></span>
+        </div>
+        <div class="rv d4" style="position:absolute;left:630px;top:238px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:15px;color:var(--cyan)"><span class="badge badge-y" style="width:26px;height:26px;font-size:13px;background:var(--cyan);color:var(--stage-bg)">3</span><span style="font-family:var(--font-display);font-weight:700;font-size:16px">tool_call: <span class="mono" style="font-size:14px">get_events('sept')</span></span></span>
+        </div>
+        <div class="rv d5" style="position:absolute;left:830px;top:318px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:15px;color:var(--amber)"><span class="badge badge-y" style="width:26px;height:26px;font-size:13px;background:var(--amber)">4</span><span style="font-family:var(--font-display);font-weight:700;font-size:16px">execute <span class="mono" style="font-size:14px">get_events('sept')</span></span></span>
+        </div>
+        <div class="rv d5" style="position:absolute;left:830px;top:398px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:15px;color:var(--amber)"><span class="badge badge-y" style="width:26px;height:26px;font-size:13px;background:var(--amber)">5</span><span style="font-family:var(--font-display);font-weight:700;font-size:16px">tool response: Hackathon, Tech Fest...</span></span>
+        </div>
+        <div class="rv d6" style="position:absolute;left:630px;top:478px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:15px;color:var(--cyan)"><span class="badge badge-y" style="width:26px;height:26px;font-size:13px;background:var(--cyan);color:var(--stage-bg)">6</span><span style="font-family:var(--font-display);font-weight:700;font-size:16px">sends tool result</span></span>
+        </div>
+        <div class="rv d7" style="position:absolute;left:200px;top:548px">
+            <span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:15px;color:var(--green)"><span class="badge badge-y" style="width:26px;height:26px;font-size:13px;background:var(--green);color:var(--stage-bg)">7</span><span style="font-family:var(--font-display);font-weight:700;font-size:17px">"Hackathon & Tech Fest this month!"</span></span>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 11b: THE GROWING PROMPT ===== -->
+<section class="slide" data-slide="13">
+    <div class="top-bar"><span class="chrome">How It Works</span><span class="chrome">13 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">How It Works</div>
+        <div class="title med rv d1">THE GROWING<br>CONVERSATION</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px;right:var(--slide-padding);font-family:var(--font-display);font-size:18px;color:var(--grey);text-align:right;line-height:1.4;max-width:600px;margin-left:auto">
+        <span class="rv d1">Every turn, the full conversation is sent to the LLM.<br>Here's what that looks like under the hood:</span>
+    </div>
+    <!-- Message stack with turn brackets -->
+    <div style="position:absolute;left:100px;right:100px;top:270px;display:flex;gap:0">
+        <!-- Turn brackets column -->
+        <div style="width:70px;flex-shrink:0;position:relative">
+            <!-- Turn 1 bracket — spans system through assistant answer (5 rows) -->
+            <div class="rv d2" style="position:absolute;top:0;left:20px;width:36px;height:262px;border:2px solid var(--yellow);border-right:none;border-radius:8px 0 0 8px"></div>
+            <div style="position:absolute;top:110px;left:0;width:20px;text-align:center;font-family:var(--font-mono);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--yellow);writing-mode:vertical-rl;transform:rotate(180deg)">TURN 1</div>
+            <!-- Turn 2 bracket — spans follow-up user + assistant (2 rows) -->
+            <div class="rv d6" style="position:absolute;top:298px;left:20px;width:36px;height:112px;border:2px solid var(--green);border-right:none;border-radius:8px 0 0 8px"></div>
+            <div style="position:absolute;top:332px;left:0;width:20px;text-align:center;font-family:var(--font-mono);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--green);writing-mode:vertical-rl;transform:rotate(180deg)">TURN 2</div>
+        </div>
+        <!-- Messages column -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <!-- System message -->
+            <div class="rv d2" style="display:flex;align-items:flex-start;gap:20px;padding:14px 24px;border-radius:10px;background:var(--surface);border-left:5px solid var(--magenta)">
+                <span style="font-family:var(--font-mono);font-size:15px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--magenta);min-width:110px">SYSTEM</span>
+                <span style="font-family:var(--font-mono);font-size:18px;color:var(--grey);line-height:1.4">You are a campus assistant. <span style="color:var(--amber)">tools:</span> [ <span style="color:var(--white)">get_events</span>, <span style="color:var(--white)">get_faculty</span>, <span style="color:var(--white)">search_notices</span> ]</span>
+            </div>
+            <!-- User message 1 -->
+            <div class="rv d3" style="display:flex;align-items:center;gap:20px;padding:12px 24px;border-radius:10px;background:var(--surface);border-left:5px solid var(--white)">
+                <span style="font-family:var(--font-mono);font-size:15px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--white);min-width:110px">USER</span>
+                <span style="font-family:var(--font-display);font-weight:700;font-size:21px;color:var(--white)">"What events are happening this month?"</span>
+            </div>
+            <!-- Assistant tool call -->
+            <div class="rv d4" style="display:flex;align-items:center;gap:20px;padding:12px 24px;border-radius:10px;background:var(--yellow-glow);border-left:5px solid var(--yellow)">
+                <span style="font-family:var(--font-mono);font-size:15px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--yellow);min-width:110px">ASSISTANT</span>
+                <span style="font-family:var(--font-mono);font-size:18px;color:var(--yellow)">{ <span style="color:var(--grey)">tool_call:</span> <span style="color:var(--white)">"get_events"</span>, <span style="color:var(--grey)">args:</span> { <span style="color:var(--grey)">month:</span> <span style="color:var(--white)">"sept"</span> } }</span>
+            </div>
+            <!-- Tool result -->
+            <div class="rv d5" style="display:flex;align-items:center;gap:20px;padding:12px 24px;border-radius:10px;background:rgba(251,191,36,0.06);border-left:5px solid var(--amber)">
+                <span style="font-family:var(--font-mono);font-size:15px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--amber);min-width:110px">TOOL</span>
+                <span style="font-family:var(--font-mono);font-size:18px;color:var(--amber)">{ <span style="color:var(--grey)">result:</span> <span style="color:var(--white)">["Hackathon Sept 15", "Tech Fest Sept 20", "AI Workshop Sept 25"]</span> }</span>
+            </div>
+            <!-- Assistant final answer -->
+            <div class="rv d5" style="display:flex;align-items:center;gap:20px;padding:12px 24px;border-radius:10px;background:rgba(52,211,153,0.06);border-left:5px solid var(--green)">
+                <span style="font-family:var(--font-mono);font-size:15px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--green);min-width:110px">ASSISTANT</span>
+                <span style="font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--green)">"Hackathon (Sept 15), Tech Fest (Sept 20), AI Workshop (Sept 25)!"</span>
+            </div>
+            <!-- Separator — follow-up turn -->
+            <div class="rv d6" style="display:flex;align-items:center;gap:12px;padding:4px 0">
+                <div style="flex:1;height:1px;background:var(--border-light)"></div>
+                <span style="font-family:var(--font-mono);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--grey)">follow-up — all above is resent + new messages</span>
+                <div style="flex:1;height:1px;background:var(--border-light)"></div>
+            </div>
+            <!-- User follow-up -->
+            <div class="rv d6" style="display:flex;align-items:center;gap:20px;padding:12px 24px;border-radius:10px;background:var(--surface);border-left:5px solid var(--white)">
+                <span style="font-family:var(--font-mono);font-size:15px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--white);min-width:110px">USER</span>
+                <span style="font-family:var(--font-display);font-weight:700;font-size:21px;color:var(--white)">"Which one is good for beginners?"</span>
+            </div>
+            <!-- Assistant follow-up -->
+            <div class="rv d7" style="display:flex;align-items:center;gap:20px;padding:12px 24px;border-radius:10px;background:rgba(52,211,153,0.06);border-left:5px solid var(--green)">
+                <span style="font-family:var(--font-mono);font-size:15px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--green);min-width:110px">ASSISTANT</span>
+                <span style="font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--green)">"AI Workshop on Sept 25 — it's designed for first-timers!"</span>
+            </div>
+        </div>
+    </div>
+    <!-- Key insight -->
+    <div style="position:absolute;bottom:76px;left:var(--slide-padding);right:var(--slide-padding)">
+        <div class="card card-y rv d7" style="display:inline-block;padding:14px 24px">
+            <span class="body" style="font-size:22px">The LLM sees the <strong style="color:var(--yellow)">entire history</strong> every turn — it knows "which one" means events. That's why <strong style="color:var(--cyan)">context windows</strong> matter.</span>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 12: MEMORY & PLANNING ===== -->
+<section class="slide" data-slide="14">
+    <div class="top-bar"><span class="chrome">Key Components</span><span class="chrome">14 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">Key Components</div>
+        <div class="title med rv d1">HOW AGENTS<br>REMEMBER: MEMORY</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:300px;display:flex;gap:60px">
+        <div style="width:780px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow);margin-bottom:18px;border-bottom:2px solid var(--yellow);padding-bottom:10px">SHORT-TERM (Context Window)</div>
+            <div class="card rv d3" style="padding:24px">
+                <div style="font-family:var(--font-display);font-size:24px;color:var(--grey);line-height:2">
+                    <span style="color:var(--yellow);font-weight:700">You:</span> What events are happening this month?<br>
+                    <span style="color:var(--amber);font-weight:700">Agent:</span> Hackathon, Tech Fest, AI Workshop<br>
+                    <span style="color:var(--yellow);font-weight:700">You:</span> Which one is for beginners?<br>
+                    <span style="font-size:20px;color:var(--cyan);font-style:italic">→ Knows "which one" refers to events, not departments</span>
+                </div>
+            </div>
+            <div class="rv d4" style="font-family:var(--font-display);font-size:20px;color:var(--grey);margin-top:14px;padding-left:4px">Lives inside the conversation. Gone when chat ends.</div>
+        </div>
+        <div style="width:780px">
+            <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--magenta);margin-bottom:18px;border-bottom:2px solid var(--magenta);padding-bottom:10px">LONG-TERM (Persisted Store)</div>
+            <div class="card rv d5" style="padding:24px">
+                <div style="font-family:var(--font-display);font-size:20px;color:var(--grey);margin-bottom:16px">Saved across sessions — the agent remembers you:</div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;gap:12px;align-items:center"><span class="pill" style="border-color:var(--magenta);color:var(--magenta)">3rd year student</span><span style="font-family:var(--font-display);font-size:18px;color:var(--grey)">→ tailors depth</span></div>
+                    <div style="display:flex;gap:12px;align-items:center"><span class="pill" style="border-color:var(--magenta);color:var(--magenta)">Asked about placements</span><span style="font-family:var(--font-display);font-size:18px;color:var(--grey)">→ proactive updates</span></div>
+                    <div style="display:flex;gap:12px;align-items:center"><span class="pill" style="border-color:var(--magenta);color:var(--magenta)">Interested in hackathons</span><span style="font-family:var(--font-display);font-size:18px;color:var(--grey)">→ notifies about new ones</span></div>
+                </div>
+            </div>
+            <div class="rv d6" style="font-family:var(--font-display);font-size:20px;color:var(--grey);margin-top:14px;padding-left:4px">Stored in a database or file. Survives restarts.</div>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 12: RESPONSIBLE AI (NEW) ===== -->
+<section class="slide" data-slide="15">
+    <div class="top-bar"><span class="chrome">Responsible AI</span><span class="chrome">15 / 20</span></div>
+    <div class="yellow-bar rv d1" style="left:var(--slide-padding);top:200px;height:340px"></div>
+    <div style="position:absolute;left:120px;top:50%;transform:translateY(-50%);max-width:1700px;right:100px">
+        <div class="tag rv">Responsible AI</div>
+        <div class="rv d1" style="font-family:var(--font-display);font-weight:900;font-size:56px;line-height:1.15;color:var(--yellow);text-transform:uppercase;margin-bottom:16px">WITH GREAT AGENCY<br>COMES GREAT RISK</div>
+        <div class="rv d2" style="font-family:var(--font-display);font-size:22px;color:var(--grey);margin-bottom:40px">Our JCE agent says <span style="color:var(--green);font-weight:700">"I'm not sure"</span> when it doesn't know. That's a feature, not a bug.</div>
+        <div class="rv d3" style="display:flex;gap:20px">
+            <div class="card" style="padding:24px 24px;flex:1;text-align:center;border-top:4px solid var(--red)">
+                <div style="font-size:32px;margin-bottom:8px">🤥</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--red);text-transform:uppercase;margin-bottom:6px">Hallucination</div>
+                <div style="font-family:var(--font-display);font-size:17px;color:var(--grey);line-height:1.4">Can act on wrong info. Verify before critical actions.</div>
+            </div>
+            <div class="card" style="padding:24px 24px;flex:1;text-align:center;border-top:4px solid var(--amber)">
+                <div style="font-size:32px;margin-bottom:8px">🔄</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--amber);text-transform:uppercase;margin-bottom:6px">Runaway Loops</div>
+                <div style="font-family:var(--font-display);font-size:17px;color:var(--grey);line-height:1.4">Without limits, loops forever. Set max iterations.</div>
+            </div>
+            <div class="card" style="padding:24px 24px;flex:1;text-align:center;border-top:4px solid var(--green)">
+                <div style="font-size:32px;margin-bottom:8px">🧑‍⚖️</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--green);text-transform:uppercase;margin-bottom:6px">Human-in-Loop</div>
+                <div style="font-family:var(--font-display);font-size:17px;color:var(--grey);line-height:1.4">High-stakes actions need human approval first.</div>
+            </div>
+            <div class="card" style="padding:24px 24px;flex:1;text-align:center;border-top:4px solid var(--cyan)">
+                <div style="font-size:32px;margin-bottom:8px">🔒</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--cyan);text-transform:uppercase;margin-bottom:6px">Scope Limits</div>
+                <div style="font-family:var(--font-display);font-size:17px;color:var(--grey);line-height:1.4">Only give tools the agent needs. Least privilege.</div>
+            </div>
+            <div class="card" style="padding:24px 24px;flex:1;text-align:center;border-top:4px solid var(--magenta)">
+                <div style="font-size:32px;margin-bottom:8px">📊</div>
+                <div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--magenta);text-transform:uppercase;margin-bottom:6px">Evals</div>
+                <div style="font-family:var(--font-display);font-size:17px;color:var(--grey);line-height:1.4">Test 100 questions. Measure accuracy. Catch regressions.</div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 13: AGENTS SHIPPING TODAY ===== -->
+<!-- ===== 14: COMPLEXITY LADDER ===== -->
+<section class="slide" data-slide="16">
+    <div class="top-bar"><span class="chrome">Choosing Your Approach</span><span class="chrome">16 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">Choosing Your Approach</div>
+        <div class="title med rv d1">THE COMPLEXITY<br>LADDER</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:310px;width:1200px;display:flex;flex-direction:column;gap:10px">
+        <div class="lstep rv d2" style="border-left-color:var(--grey)"><div class="num" style="color:var(--grey)">1</div><div class="nm">Single LLM Call</div></div>
+        <div class="lstep rv d3" style="border-left-color:var(--cyan)"><div class="num" style="color:var(--cyan)">2</div><div class="nm">Prompt Chaining</div></div>
+        <div class="lstep rv d4" style="border-left-color:var(--amber)"><div class="num" style="color:var(--amber)">3</div><div class="nm">Routing</div></div>
+        <div class="lstep rv d5" style="border-left-color:var(--magenta)"><div class="num" style="color:var(--magenta)">4</div><div class="nm">Parallelization</div></div>
+        <div class="lstep rv d6" style="border-left-color:var(--yellow)"><div class="num" style="color:var(--yellow)">5</div><div class="nm">Orchestrator-Workers</div></div>
+        <div class="lstep rv d7" style="border-left-color:var(--green);border-left-width:6px"><div class="num" style="color:var(--green)">6</div><div class="nm" style="color:var(--green)">Autonomous Agent</div><div style="margin-left:auto;font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--yellow);text-transform:uppercase">← JCE Agent is here!</div></div>
+    </div>
+    <div style="position:absolute;right:var(--slide-padding);top:340px;display:flex;flex-direction:column;gap:10px;width:280px">
+        <div class="card rv d4" style="text-align:center;padding:16px"><div style="font-family:var(--font-display);font-weight:900;font-size:18px;text-transform:uppercase;color:var(--grey);letter-spacing:2px">Workflows</div><div style="font-family:var(--font-display);font-size:16px;color:var(--grey)">(predefined paths)</div></div>
+        <div class="card rv d6" style="text-align:center;padding:16px;border-color:var(--yellow)"><div style="font-family:var(--font-display);font-weight:900;font-size:18px;text-transform:uppercase;color:var(--yellow);letter-spacing:2px">Agents</div><div style="font-family:var(--font-display);font-size:16px;color:var(--grey)">(self-directed)</div></div>
+    </div>
+    <div style="position:absolute;bottom:80px;left:var(--slide-padding)">
+        <div class="card card-y rv d8" style="display:inline-block;padding:16px 24px">
+            <span class="body" style="font-size:24px">"Start simple. Only add complexity when needed." <span style="color:var(--grey)">— Anthropic</span></span>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 16: CODE ===== -->
+<section class="slide" data-slide="17">
+    <div class="top-bar"><span class="chrome">Let's Build</span><span class="chrome">17 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">Under The Hood</div>
+        <div class="title sm rv d1">AN AGENT IN<br>50 LINES OF PYTHON</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:280px;display:flex;gap:36px">
+        <div style="width:520px;display:flex;flex-direction:column;gap:10px">
+            <div class="card card-y rv d2" style="display:flex;align-items:center;gap:16px;padding:16px 20px">
+                <div class="badge badge-o" style="width:42px;height:42px;font-size:14px">SP</div>
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white);text-transform:uppercase">System Prompt</div><div class="mono" style="font-size:15px">~5 lines · "You are JCE Campus Guru..."</div></div>
+            </div>
+            <div class="card card-y rv d3" style="display:flex;align-items:center;gap:16px;padding:16px 20px">
+                <div class="badge badge-o" style="width:42px;height:42px;font-size:14px">TD</div>
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white);text-transform:uppercase">Tool Definitions</div><div class="mono" style="font-size:15px">~10 lines/tool · JSON schema</div></div>
+            </div>
+            <div class="card card-y rv d4" style="display:flex;align-items:center;gap:16px;padding:16px 20px">
+                <div class="badge badge-o" style="width:42px;height:42px;font-size:14px">AL</div>
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white);text-transform:uppercase">Agentic Loop</div><div class="mono" style="font-size:15px">~15 lines · while not done: act → observe</div></div>
+            </div>
+            <div class="card card-y rv d5" style="display:flex;align-items:center;gap:16px;padding:16px 20px">
+                <div class="badge badge-o" style="width:42px;height:42px;font-size:14px">TF</div>
+                <div><div style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--white);text-transform:uppercase">Tool Functions</div><div class="mono" style="font-size:15px">~5 lines each · your actual code</div></div>
+            </div>
+        </div>
+        <div style="flex:1" class="rv d5">
+            <div style="font-family:var(--font-display);font-weight:900;font-size:16px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow-dim);margin-bottom:8px">THE AGENTIC LOOP</div>
+            <div class="code">messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>,
+             <span class="str">"content"</span>: question}]
+
+<span class="kw">while</span> <span class="nm">True</span>:
+    resp = client.chat.completions.<span class="fn">create</span>(
+        model=<span class="str">"gpt-4o-mini"</span>,
+        messages=messages,
+        tools=tool_defs
+    )
+
+    <span class="kw">if</span> resp.choices[<span class="nm">0</span>].finish_reason == <span class="str">"stop"</span>:
+        <span class="fn">print</span>(resp.choices[<span class="nm">0</span>].message.content)
+        <span class="kw">break</span>
+
+    <span class="kw">for</span> call <span class="kw">in</span> resp.choices[<span class="nm">0</span>]
+                   .message.tool_calls:
+        result = <span class="fn">run_tool</span>(call)
+        messages.<span class="fn">append</span>(result)</div>
+        </div>
+    </div>
+    <!-- QR bottom-left under the 4 cards -->
+    <div style="position:absolute;left:var(--slide-padding);bottom:90px;display:flex;align-items:center;gap:16px" class="rv d7">
+        <div class="qr sm" style="width:90px;height:90px;font-size:14px"><span style="font-size:24px">📷</span>[QR]</div>
+        <div><div style="font-family:var(--font-display);font-weight:900;font-size:18px;color:var(--yellow);text-transform:uppercase">Starter Kit</div><div class="mono" style="font-size:14px;color:var(--grey)">Full source on GitHub</div></div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 17: JCE CAMPUS GURU ARCH ===== -->
+<section class="slide" data-slide="18">
+    <div class="top-bar"><span class="chrome">The Demo Agent</span><span class="chrome">18 / 20</span></div>
+    <div style="position:absolute;left:var(--slide-padding);top:80px">
+        <div class="tag rv">The Demo Agent</div>
+        <div class="title sm rv d1">JCE CAMPUS GURU<br>ARCHITECTURE</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:260px;right:var(--slide-padding);display:flex;align-items:flex-start;gap:30px;justify-content:center">
+        <div class="rv-scale d2" style="width:240px;padding:32px;border:2px solid var(--yellow-dim);border-radius:14px;text-align:center;background:var(--surface)">
+            <div style="font-size:56px;margin-bottom:12px">👤</div>
+            <div style="font-family:var(--font-display);font-weight:900;font-size:28px;color:var(--yellow);text-transform:uppercase">Student</div>
+            <div style="font-family:var(--font-display);font-size:19px;color:var(--grey);margin-top:8px">Asks on phone<br>via Gradio app</div>
+        </div>
+        <div class="rv d3" style="font-size:44px;color:var(--grey);margin-top:80px">→</div>
+        <div class="rv-scale d3" style="border:3px solid var(--yellow);border-radius:14px;padding:32px;width:460px;background:var(--yellow-glow)">
+            <div style="font-family:var(--font-display);font-weight:900;font-size:30px;color:var(--yellow);letter-spacing:2px;margin-bottom:20px;text-align:center;text-transform:uppercase">JCE Campus Guru</div>
+            <div style="display:flex;gap:14px">
+                <div class="card" style="flex:1;padding:16px;text-align:center"><div style="font-family:var(--font-display);font-weight:900;font-size:19px;color:var(--cyan);text-transform:uppercase">LLM</div><div style="font-family:var(--font-mono);font-size:15px;color:var(--grey)">GPT-4o-mini</div></div>
+                <div class="card" style="flex:1;padding:16px;text-align:center"><div style="font-family:var(--font-display);font-weight:900;font-size:19px;color:var(--magenta);text-transform:uppercase">Memory</div><div style="font-family:var(--font-mono);font-size:15px;color:var(--grey)">Chat history</div></div>
+                <div class="card" style="flex:1;padding:16px;text-align:center"><div style="font-family:var(--font-display);font-weight:900;font-size:19px;color:var(--amber);text-transform:uppercase">Prompt</div><div style="font-family:var(--font-mono);font-size:15px;color:var(--grey)">JCE context</div></div>
+            </div>
+        </div>
+        <div class="rv d4" style="font-size:44px;color:var(--grey);margin-top:80px">→</div>
+        <div class="rv-scale d4" style="width:400px">
+            <div style="font-family:var(--font-display);font-weight:900;font-size:22px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow-dim);margin-bottom:14px;text-align:center">7 TOOLS</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+                <span class="pill" style="display:block;text-align:center;font-size:18px;padding:10px 16px">search_website</span>
+                <span class="pill" style="display:block;text-align:center;font-size:18px;padding:10px 16px;border-color:var(--amber);color:var(--amber)">get_dept_info</span>
+                <span class="pill" style="display:block;text-align:center;font-size:18px;padding:10px 16px">get_placements</span>
+                <span class="pill" style="display:block;text-align:center;font-size:18px;padding:10px 16px;border-color:var(--magenta);color:var(--magenta)">get_events</span>
+                <span class="pill" style="display:block;text-align:center;font-size:18px;padding:10px 16px">get_courses</span>
+                <span class="pill" style="display:block;text-align:center;font-size:18px;padding:10px 16px;border-color:var(--cyan);color:var(--cyan)">get_facilities</span>
+                <span class="pill" style="display:block;text-align:center;font-size:18px;padding:10px 16px;border-color:var(--green);color:var(--green)">compare_depts</span>
+            </div>
+        </div>
+        <div class="rv d5" style="font-size:44px;color:var(--grey);margin-top:80px">→</div>
+        <div class="rv-scale d5" style="width:240px;padding:32px;border:2px solid var(--yellow-dim);border-radius:14px;text-align:center;background:var(--surface)">
+            <div style="font-size:56px;margin-bottom:12px">🗄️</div>
+            <div style="font-family:var(--font-display);font-weight:900;font-size:28px;color:var(--amber);text-transform:uppercase">JCE Data</div>
+            <div style="font-family:var(--font-display);font-size:19px;color:var(--grey);margin-top:8px">Pre-scraped<br>JSON files</div>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 18: LIVE DEMO ===== -->
+<section class="slide" data-slide="19">
+    <div class="top-bar"><span class="chrome">Live Demo</span><span class="chrome">19 / 20</span></div>
+    <div style="position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);text-align:center">
+        <div class="rv" style="font-family:var(--font-mono);font-size:20px;letter-spacing:4px;text-transform:uppercase;color:var(--yellow-dim);margin-bottom:12px">⚡ LIVE DEMO</div>
+        <div class="rv d1" style="font-family:var(--font-display);font-weight:900;font-size:100px;line-height:0.9;letter-spacing:-4px;text-transform:uppercase;color:var(--yellow)">LET'S SEE<br>IT WORK</div>
+    </div>
+    <div style="position:absolute;left:var(--slide-padding);top:52%;right:var(--slide-padding)">
+        <div class="rv d2" style="font-family:var(--font-display);font-weight:900;font-size:20px;letter-spacing:2px;text-transform:uppercase;color:var(--yellow-dim);margin-bottom:16px">QUESTIONS WE'LL TRY LIVE</div>
+        <div style="display:flex;gap:16px;margin-bottom:28px">
+            <div class="card card-y rv d3" style="flex:1;padding:18px"><div class="mono" style="font-size:16px;margin-bottom:4px">Demo 1 — Tool Use</div><div class="body" style="font-size:20px">"What clubs does AIDS dept have?"</div></div>
+            <div class="card card-y rv d4" style="flex:1;padding:18px"><div class="mono" style="font-size:16px;margin-bottom:4px">Demo 2 — Multi-Step</div><div class="body" style="font-size:20px">"Compare AIDS vs CSE-AIML"</div></div>
+            <div class="card card-y rv d5" style="flex:1;padding:18px"><div class="mono" style="font-size:16px;margin-bottom:4px">Demo 3 — Memory</div><div class="body" style="font-size:20px">"Which one has better placements?"</div></div>
+            <div class="card card-y rv d6" style="flex:1;padding:18px"><div class="mono" style="font-size:16px;margin-bottom:4px">Demo 4 — Guardrails</div><div class="body" style="font-size:20px">"What's the principal's salary?"</div></div>
+        </div>
+        <div style="display:flex;gap:32px;justify-content:center">
+            <div class="card rv d6" style="width:300px;text-align:center;padding:22px"><div style="font-size:32px;margin-bottom:8px">🔧</div><div class="body" style="font-size:22px">Watch the tool calls<br>in real time</div></div>
+            <div class="card rv d7" style="width:300px;text-align:center;padding:22px"><div style="font-size:32px;margin-bottom:8px">🧠</div><div class="body" style="font-size:22px">Watch the reasoning<br>process</div></div>
+            <div class="card rv d8" style="width:300px;text-align:center;padding:22px"><div style="font-size:32px;margin-bottom:8px">📱</div><div class="body" style="font-size:22px">Ask your own questions<br>from your phone</div></div>
+        </div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+<!-- ===== 19: THANK YOU ===== -->
+<section class="slide" data-slide="20">
+    <div class="top-bar"><span class="chrome">Thank You</span><span class="chrome">20 / 20</span></div>
+    <div class="yellow-bar rv d1" style="left:var(--slide-padding);top:100px;height:460px"></div>
+    <div style="position:absolute;left:120px;top:42%;transform:translateY(-50%)">
+        <div class="rv" style="font-family:var(--font-display);font-weight:900;font-size:120px;line-height:0.88;letter-spacing:-4px;text-transform:uppercase;color:var(--yellow)">THANK<br>YOU</div>
+        <div class="accent rv d2"></div>
+        <div class="rv d3" style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--white);line-height:1.7">
+            Prasanna Veerapandi (Bala)<br>
+            <span style="font-size:22px;color:var(--grey);font-weight:500">Data & AI Platform Engineer, Trax Retail<br>Co-Founder, bSigma AI</span>
+        </div>
+        <div class="rv d4 mono" style="font-size:18px;margin-top:8px">kairoclaw.com  |  bsigma.ai</div>
+    </div>
+    <div style="position:absolute;right:200px;top:38%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:16px">
+        <div class="qr rv-scale d4" style="width:220px;height:220px"><span style="font-size:48px">📷</span>[QR CODE]</div>
+        <div class="rv d5" style="font-family:var(--font-display);font-weight:900;font-size:20px;color:var(--yellow);text-transform:uppercase;letter-spacing:1px">JCE Campus Guru</div>
+        <div class="rv d5" style="font-family:var(--font-display);font-size:18px;color:var(--grey)">Still live — keep asking!</div>
+    </div>
+    <div style="position:absolute;bottom:90px;left:50%;transform:translateX(-50%);text-align:center;max-width:1200px">
+        <div class="rv d6" style="font-family:var(--font-display);font-size:30px;font-weight:700;color:var(--white)">The field is 2 years old. There are no gatekeepers.<br>Your batch is the first generation that can build agents — not in 5 years, <span style="color:var(--yellow);font-weight:900;font-size:38px;text-transform:uppercase">this weekend.</span></div>
+    </div>
+    <div class="bottom-bar"><span class="chrome"></span><span class="chrome"></span></div>
+</section>
+
+</main>
+</div>
+
+<div class="edit-hotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">✏️ Edit</button>
+
+<script>
+class SlidePresentation {
+    constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.currentSlide = 0;
+        this.stage = document.getElementById('deckStage');
+        this.progressBar = document.getElementById('progressBar');
+        this.setupStageScale();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.showSlide(0);
+    }
+    setupStageScale() {
+        const scale = () => {
+            const f = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            const x = (window.innerWidth - 1920 * f) / 2;
+            const y = (window.innerHeight - 1080 * f) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${f})`;
+        };
+        scale(); window.addEventListener('resize', scale);
+    }
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable') === 'true') return;
+            switch(e.key) {
+                case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown': e.preventDefault(); this.next(); break;
+                case 'ArrowLeft': case 'ArrowUp': case 'PageUp': e.preventDefault(); this.prev(); break;
+                case 'Home': e.preventDefault(); this.showSlide(0); break;
+                case 'End': e.preventDefault(); this.showSlide(this.slides.length - 1); break;
+            }
+        });
+    }
+    setupTouchNav() {
+        let sx = 0;
+        this.stage.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) { dx < 0 ? this.next() : this.prev(); } }, { passive: true });
+    }
+    setupWheelNav() {
+        let lw = 0;
+        document.addEventListener('wheel', (e) => { const n = Date.now(); if (n - lw < 800) return; lw = n; e.deltaY > 0 ? this.next() : this.prev(); }, { passive: true });
+    }
+    showSlide(i) {
+        this.currentSlide = Math.max(0, Math.min(i, this.slides.length - 1));
+        this.slides.forEach((s, j) => { const a = j === this.currentSlide; s.classList.toggle('active', a); s.classList.toggle('visible', a); });
+        this.progressBar.style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+    }
+    next() { this.showSlide(this.currentSlide + 1); }
+    prev() { this.showSlide(this.currentSlide - 1); }
+}
+class InlineEditor {
+    constructor() { this.isActive = false; this.toggle = document.getElementById('editToggle'); }
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        this.toggle.classList.toggle('active', this.isActive);
+        document.querySelectorAll('.title, .body, .tag').forEach(el => { el.contentEditable = this.isActive ? 'true' : 'false'; });
+        this.toggle.textContent = this.isActive ? '💾 Save' : '✏️ Edit';
+        if (!this.isActive) { try { localStorage.setItem('slides-v3', document.getElementById('deckStage').innerHTML); } catch(e) {} }
+    }
+}
+const presentation = new SlidePresentation();
+const editor = new InlineEditor();
+const hotzone = document.querySelector('.edit-hotzone');
+const editToggle = document.getElementById('editToggle');
+let ht = null;
+hotzone.addEventListener('mouseenter', () => { clearTimeout(ht); editToggle.classList.add('show'); });
+hotzone.addEventListener('mouseleave', () => { ht = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
+editToggle.addEventListener('mouseenter', () => { clearTimeout(ht); });
+editToggle.addEventListener('mouseleave', () => { ht = setTimeout(() => { if (!editor.isActive) editToggle.classList.remove('show'); }, 400); });
+hotzone.addEventListener('click', () => { editor.toggleEditMode(); });
+editToggle.addEventListener('click', () => { editor.toggleEditMode(); });
+document.addEventListener('keydown', (e) => { if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) { editor.toggleEditMode(); } });
+</script>
+</body>
+</html>
